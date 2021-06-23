@@ -13,7 +13,7 @@ public class MultiClient {
             ResourceServer server = (ResourceServer) reg.lookup("RESOURCE");
             int i = 0;
             while (i < CLIENT_TOT) {
-                new ResourceClientImpl(i++, server);
+                new ResourceClientImpl(i++, server).start();
             }
         } catch (RemoteException | NotBoundException e) {
             System.err.println("Connessione al server fallita");
