@@ -16,7 +16,8 @@ public class ResourceClientImpl extends Thread implements ResourceClient {
         this.server = server;
         myId = i;
     }
-    public void notificaAggiunta() {
+    public void notificaAggiunta(Risorsa r) {
+        System.out.println("Ricevo notifica aggiunta risorsa: " + r.toString());
         aspettaAggiunta = false;
     }
     public void notificaPrelievo(Risorsa r) {
