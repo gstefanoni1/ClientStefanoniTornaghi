@@ -12,6 +12,7 @@ public class MultiClient {
             reg = LocateRegistry.getRegistry();
             RisorsaServer server = (RisorsaServer) reg.lookup("DEPOSITO");
             int i = 0;
+            RisorsaClientImpl.clientRunning = 0;
             RisorsaClientImpl.clientWaitingAggiunte = 0;
             RisorsaClientImpl.clientWaitingPrelievi = 0;
             while (i < CLIENT_TOT) {
@@ -22,7 +23,7 @@ public class MultiClient {
         }
     }
     public static void main(String[] args) throws IOException, InterruptedException {
-        MultiClient mc=new MultiClient();
+        MultiClient mc = new MultiClient();
         mc.exec();
     }
 }

@@ -11,7 +11,7 @@ public class RisorsaClientImpl extends Thread implements RisorsaClient {
     boolean aspettaPrelievo = false;
     boolean aspettaAggiunta = false;
     int count = 0;
-    public static int clientRunning = 0;
+    public static int clientRunning;
     public static int clientWaitingPrelievi;
     public static int clientWaitingAggiunte;
     int numeroClientTotali;
@@ -26,57 +26,52 @@ public class RisorsaClientImpl extends Thread implements RisorsaClient {
     }
 
     public void notificaAggiunta(Risorsa r) {
-        System.out.println(myId + " Aggiunto: " + r.toString());
+        System.out.println("[" + myId + "] Aggiunto: " + r.toString());
         aspettaAggiunta = false;
     }
 
     public void notificaPrelievo(Risorsa r) {
-        System.out.println(myId + " Prelevato:" + r.toString());
+        System.out.println("[" + myId + "] Prelevato:" + r.toString());
         aspettaPrelievo = false;
     }
 
     private void aggiunta() {
-        System.out.println(myId + " Voglio fare un aggiunta");
-        System.out.println(myId + " posso fare l'aggiunta: " + !aspettaAggiunta);
         //Attesa
         synchronized (RisorsaClientImpl.class) {
             clientWaitingAggiunte++;
         }
         int cont = 0;
         while (aspettaAggiunta) {
-            attesa(cont);
+            attesa(cont, "aggiunta");
             cont++;
         }
         synchronized (RisorsaClientImpl.class) {
             clientWaitingAggiunte--;
         }
-        //Qua ho completato l'aggiunta precedente
+        //Qua ho completato l'aggiunta precedente(nel caso ci fosse)
         try {
             //Generazione random
             Random rand = new Random();
             int nInfo = rand.nextInt(20);
             Data d = new Data("Info " + nInfo);
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            Risorsa r = new Risorsa(myId + " " + count++, d, timestamp.toString());
+            Risorsa r = new Risorsa(myId + "" + count++, d, timestamp.toString());
             //Lo inserisco nel server
             aspettaAggiunta = true;
             server.aggiungiRisorsa(r, remoteCli);
         } catch (RemoteException e) {
-            System.out.println("ERRORE ID: " + myId);
             e.printStackTrace();
         }
     }
 
     public void prelievo() {
-        System.out.println(myId + " Voglio fare un prelievo");
-        System.out.println(myId + " posso fare il prelievo: " + !aspettaPrelievo);
         //Attesa
         synchronized (RisorsaClientImpl.class) {
             clientWaitingPrelievi++;
         }
         int cont = 0;
         while (aspettaPrelievo) {
-            attesa(cont);
+            attesa(cont, "prelievo");
             cont++;
         }
         synchronized (RisorsaClientImpl.class) {
@@ -100,23 +95,26 @@ public class RisorsaClientImpl extends Thread implements RisorsaClient {
         }
         while (true) {
             Random rand = new Random();
+            //L'operazione da eseguire viene scelta a random
             if (rand.nextBoolean()) {
-                boolean f = true;
+                //Permette di cambiare scelta per evitare di avere
+                //tutti i client congestionati
+                boolean flagScelta = true;
                 synchronized (RisorsaClientImpl.class) {
                     if (clientWaitingAggiunte == clientRunning - 1)
-                        f = false;
+                        flagScelta = false;
                 }
-                if (f)
+                if (flagScelta)
                     aggiunta();
                 else
                     prelievo();
             } else {
-                boolean f = true;
+                boolean flagScelta = true;
                 synchronized (RisorsaClientImpl.class) {
                     if (clientWaitingPrelievi == clientRunning - 1)
-                        f = false;
+                        flagScelta = false;
                 }
-                if (f)
+                if (flagScelta)
                     prelievo();
                 else
                     aggiunta();
@@ -128,7 +126,7 @@ public class RisorsaClientImpl extends Thread implements RisorsaClient {
                 } catch (NoSuchObjectException e) {
                     e.printStackTrace();
                 }
-                System.out.println("Termina client: " + myId);
+                System.out.println("[" + myId + "] Termina");
                 synchronized (RisorsaClientImpl.class) {
                     clientRunning--;
                 }
@@ -137,8 +135,8 @@ public class RisorsaClientImpl extends Thread implements RisorsaClient {
         }
     }
 
-    private void attesa(int cont){
-        System.out.println("Ciclo per " + myId);
+    private void attesa(int cont, String motivo){
+        System.out.println("[" + myId + "] In attesa per " + motivo);
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
