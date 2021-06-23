@@ -1,4 +1,3 @@
-import java.io.*;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -22,7 +21,7 @@ public class MultiClient {
             System.err.println("Connessione al server fallita");
         }
     }
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) {
         MultiClient mc = new MultiClient();
         mc.exec();
     }
