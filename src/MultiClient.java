@@ -5,7 +5,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 public class MultiClient {
-    static final int CLIENT_TOT = 5;
+    static final int CLIENT_TOT = 30;
     void exec() {
         Registry reg;
         try {

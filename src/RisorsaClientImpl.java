@@ -39,11 +39,15 @@ public class RisorsaClientImpl extends Thread implements RisorsaClient {
         System.out.println(myId + " Voglio fare un aggiunta");
         System.out.println(myId + " posso fare l'aggiunta: " + !aspettaAggiunta);
         //Attesa
-        if (aspettaAggiunta) synchronized (RisorsaClientImpl.class) {
+        synchronized (RisorsaClientImpl.class) {
             clientWaitingAggiunte++;
         }
-        while (aspettaAggiunta) { }
-        if (aspettaAggiunta) synchronized (RisorsaClientImpl.class) {
+        int cont = 0;
+        while (aspettaAggiunta) {
+            attesa(cont);
+            cont++;
+        }
+        synchronized (RisorsaClientImpl.class) {
             clientWaitingAggiunte--;
         }
         //Qua ho completato l'aggiunta precedente
@@ -67,18 +71,21 @@ public class RisorsaClientImpl extends Thread implements RisorsaClient {
         System.out.println(myId + " Voglio fare un prelievo");
         System.out.println(myId + " posso fare il prelievo: " + !aspettaPrelievo);
         //Attesa
-        if (aspettaPrelievo) synchronized (RisorsaClientImpl.class) {
+        synchronized (RisorsaClientImpl.class) {
             clientWaitingPrelievi++;
         }
-        while (aspettaPrelievo) { }
-        if (aspettaPrelievo) synchronized (RisorsaClientImpl.class) {
+        int cont = 0;
+        while (aspettaPrelievo) {
+            attesa(cont);
+            cont++;
+        }
+        synchronized (RisorsaClientImpl.class) {
             clientWaitingPrelievi--;
         }
         //Fine attesa
         try {
             aspettaPrelievo = true;
             server.prelevaRisorsa(remoteCli);
-
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -130,10 +137,21 @@ public class RisorsaClientImpl extends Thread implements RisorsaClient {
         }
     }
 
-
-    private synchronized void bannerWait(){
+    private void attesa(int cont){
+        System.out.println("Ciclo per " + myId);
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (cont == 10 && clientWaitingAggiunte + clientWaitingPrelievi == clientRunning) {
+            bannerWait();
+        }
+    }
+    private synchronized void bannerWait() {
         if (clientRunning == (clientWaitingPrelievi + clientWaitingAggiunte)) {
             System.out.println("TUTTI I CLIENT SONO IN WAITING");
+            System.out.println("IMPOSSIBILE COMPLETARE LE TRANSAZIONI");
             System.exit(0);
         }
     }
