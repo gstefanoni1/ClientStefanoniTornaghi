@@ -1,4 +1,6 @@
-public class Risorsa {
+import java.io.Serializable;
+
+public class Risorsa implements Serializable {
     private String nome;
     private Data data;
     private String timestamp;

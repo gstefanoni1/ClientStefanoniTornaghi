@@ -10,10 +10,12 @@ public class MultiClient {
         Registry reg;
         try {
             reg = LocateRegistry.getRegistry();
-            ResourceServer server = (ResourceServer) reg.lookup("RESOURCE");
+            RisorsaServer server = (RisorsaServer) reg.lookup("DEPOSITO");
             int i = 0;
+            RisorsaClientImpl.clientWaitingAggiunte = 0;
+            RisorsaClientImpl.clientWaitingPrelievi = 0;
             while (i < CLIENT_TOT) {
-                new ResourceClientImpl(i++, server).start();
+                new RisorsaClientImpl(i++, server, CLIENT_TOT).start();
             }
         } catch (RemoteException | NotBoundException e) {
             System.err.println("Connessione al server fallita");
