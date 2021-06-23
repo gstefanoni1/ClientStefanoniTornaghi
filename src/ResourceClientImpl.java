@@ -56,6 +56,9 @@ public class ResourceClientImpl extends Thread implements ResourceClient {
 
             if(!aspettaPrelievo && !aspettaAggiunta){
                 if(rand.nextInt(4) == 1){
+                    try {
+                        UnicastRemoteObject.unexportObject(this, true);
+                    } catch (NoSuchObjectException e) {	e.printStackTrace(); }
                     System.out.println("Termina client: " + myId);
                     return;
                 }
