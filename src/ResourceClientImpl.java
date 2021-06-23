@@ -1,5 +1,6 @@
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.sql.Timestamp;
 import java.util.*;
 import java.rmi.NoSuchObjectException;
 
@@ -8,6 +9,7 @@ public class ResourceClientImpl extends Thread implements ResourceClient {
     int myId;
     boolean aspettaPrelievo = false;
     boolean aspettaAggiunta = false;
+    int count = 0;
     Random rand = new Random();
 
     ResourceClientImpl(int i, ResourceServer server){
@@ -30,11 +32,34 @@ public class ResourceClientImpl extends Thread implements ResourceClient {
                 try {
                     remoteCli = (ResourceClient) UnicastRemoteObject.exportObject(this, 2033);
                     int nInfo = rand.nextInt(20);
-                    Data d = Data("Info" +  );
+                    Data d = new Data("Info " + nInfo );
+                    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+                    Risorsa r = new Risorsa(myId + " " + count, d, timestamp.toString());
+                    server.aggiungiRisorsa(r, remoteCli);
+                    aspettaAggiunta = true;
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
             }
+
+            if(!aspettaPrelievo){
+                try {
+                    remoteCli = (ResourceClient) UnicastRemoteObject.exportObject(this, 2033);
+                    server.prelevaRisorsa(remoteCli);
+                    aspettaPrelievo = true;
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            if(!aspettaPrelievo && !aspettaAggiunta){
+                if(rand.nextInt(4) == 1){
+                    System.out.println("Termina client: " + myId);
+                    return;
+                }
+            }
+
         }
     }
 }

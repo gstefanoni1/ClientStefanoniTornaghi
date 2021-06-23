@@ -16,7 +16,7 @@ public class MultiClient {
                 new ResourceClientImpl(i++, server);
             }
         } catch (RemoteException | NotBoundException e) {
-            System.err.println("connecting to server failed");
+            System.err.println("Connessione al server fallita");
         }
     }
     public static void main(String[] args) throws IOException, InterruptedException {

@@ -3,6 +3,13 @@ public class Risorsa {
     private Data data;
     private String timestamp;
 
+    public Risorsa(){}
+    public Risorsa(String nome, Data data, String timestamp){
+        this.nome = nome;
+        this.data = data;
+        this.timestamp = timestamp;
+    }
+
     public String getNome() {
         return nome;
     }
